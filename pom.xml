@@ -1,18 +1,121 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>gr.xe</groupId>
+
   <artifactId>xe-testng-framework</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>xe-testng-framework</name>
-  <url>http://maven.apache.org</url>
+
+  <version>1.0</version>
+
+  <properties>
+
+    <maven.compiler.source>21</maven.compiler.source>
+
+    <maven.compiler.target>21</maven.compiler.target>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <selenium.version>4.25.0</selenium.version>
+
+    <testng.version>7.10.2</testng.version>
+
+    <allure.version>2.29.0</allure.version>
+
+  </properties>
+
   <dependencies>
+
+    <!-- Selenium -->
+
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
+
+      <groupId>org.seleniumhq.selenium</groupId>
+
+      <artifactId>selenium-java</artifactId>
+
+      <version>${selenium.version}</version>
+
     </dependency>
+
+    <!-- TestNG -->
+
+    <dependency>
+
+      <groupId>org.testng</groupId>
+
+      <artifactId>testng</artifactId>
+
+      <version>${testng.version}</version>
+
+      <scope>test</scope>
+
+    </dependency>
+
+    <!-- Allure -->
+
+    <dependency>
+
+      <groupId>io.qameta.allure</groupId>
+
+      <artifactId>allure-testng</artifactId>
+
+      <version>${allure.version}</version>
+
+    </dependency>
+
+    <!-- AssertJ -->
+
+    <dependency>
+
+      <groupId>org.assertj</groupId>
+
+      <artifactId>assertj-core</artifactId>
+
+      <version>3.26.3</version>
+
+    </dependency>
+
+    <!-- Logback -->
+
+    <dependency>
+
+      <groupId>ch.qos.logback</groupId>
+
+      <artifactId>logback-classic</artifactId>
+
+      <version>1.5.6</version>
+
+    </dependency>
+
   </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+
+        <groupId>org.apache.maven.plugins</groupId>
+
+        <artifactId>maven-surefire-plugin</artifactId>
+
+        <version>3.3.0</version>
+
+        <configuration>
+
+          <suiteXmlFiles>
+
+            <suiteXmlFile>testng.xml</suiteXmlFile>
+
+          </suiteXmlFiles>
+
+        </configuration>
+
+      </plugin>
+
+    </plugins>
+
+  </build>
+
 </project>
