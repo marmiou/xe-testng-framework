@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 
-<suite name="XE Automation Suite" parallel="tests" thread-count="3">
+<suite name="XE Automation Suite" parallel="tests" thread-count="2">
 
     <test name="Chrome Tests">
 
@@ -18,19 +18,6 @@
     <test name="Firefox Tests">
 
         <parameter name="browser" value="firefox"/>
-
-        <classes>
-
-            <class name="gr.xe.tests.DummyTest"/>
-
-        </classes>
-
-    </test>
-
-
-    <test name="Edge Tests">
-
-        <parameter name="browser" value="edge"/>
 
         <classes>
 
