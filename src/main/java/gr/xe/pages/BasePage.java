@@ -19,38 +19,27 @@ public abstract class BasePage {
 
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
     }
-
-    // FIND ONE
 
     protected WebElement find(By locator) {
 
         return wait.until(
                 ExpectedConditions.visibilityOfElementLocated(locator)
         );
-
     }
 
-    // FIND MANY (SAFE)
 
     protected List<WebElement> findAll(By locator) {
 
         return driver.findElements(locator);
-
     }
-
-    // CLICK SAFE
 
     protected void click(By locator) {
 
         wait.until(
                 ExpectedConditions.elementToBeClickable(locator)
         ).click();
-
     }
-
-    // TYPE SAFE
 
     protected void type(By locator, String text) {
 
@@ -60,7 +49,6 @@ public abstract class BasePage {
 
         element.clear();
         element.sendKeys(text);
-
     }
 
     protected int extractNumber(String text) {
@@ -68,7 +56,5 @@ public abstract class BasePage {
         return Integer.parseInt(
                 text.replaceAll("[^0-9]", "")
         );
-
     }
-
 }

@@ -29,12 +29,10 @@ public class HomePage extends BasePage {
     }
 
     public HomePage acceptCookies() {
-        click(acceptCookiesBtn);
+        if (!driver.findElements(acceptCookiesBtn).isEmpty()) {
+            click(acceptCookiesBtn);
+        }
         return this;
-    }
-
-    public boolean isRentSelected() {
-        return find(rentSelected).isDisplayed();
     }
 
     public HomePage selectAllAutocompleteAreas(String area) {
