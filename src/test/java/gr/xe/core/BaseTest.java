@@ -22,8 +22,9 @@ public abstract class BaseTest {
     @AfterMethod(alwaysRun = true)
     public void teardown() {
 
-        DriverFactory.quitDriver();
-
+        if (DriverFactory.getDriver() != null) {
+            DriverFactory.quitDriver();
+        }
     }
 
 }
