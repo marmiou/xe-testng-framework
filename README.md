@@ -106,6 +106,41 @@ Run specific suite:
 ```bash
 mvn test -DsuiteXmlFile=testng.xml
 ```
+# 🧪 Headless Execution
+
+The framework supports both **headed** and **headless** execution.
+
+## Local execution (default)
+
+Runs with visible browser:
+
+```bash
+mvn test
+```
+
+---
+
+## Headless execution
+
+Run tests in headless mode:
+
+```bash
+mvn test -Dheadless=true
+```
+
+---
+
+## CI execution
+
+In CI environments (GitHub Actions), headless mode is automatically enabled.
+
+No additional configuration is required.
+
+---
+
+This allows flexible execution depending on the environment.
+
+
 
 ---
 

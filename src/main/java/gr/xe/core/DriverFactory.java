@@ -1,6 +1,7 @@
 package gr.xe.core;
 
 import org.openqa.selenium.WebDriver;
+
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
@@ -10,23 +11,19 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 
-import java.time.Duration;
-
-public final class DriverFactory {
+public class DriverFactory {
 
     private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
-    private DriverFactory() {}
-
-    public static WebDriver getDriver() {
-
-        return driver.get();
-
-    }
 
     public static void initDriver(String browser) {
 
-        WebDriver webDriver;
+        boolean isHeadless = Boolean.parseBoolean(
+                System.getProperty("headless", "false")
+        );
+
+        boolean isCI = System.getenv("CI") != null;
+
 
         switch (browser.toLowerCase()) {
 
@@ -34,9 +31,17 @@ public final class DriverFactory {
 
                 ChromeOptions chromeOptions = new ChromeOptions();
 
-                chromeOptions.addArguments("--start-maximized");
+                if (isHeadless || isCI) {
 
-                webDriver = new ChromeDriver(chromeOptions);
+                    chromeOptions.addArguments("--headless=new");
+
+                }
+
+                chromeOptions.addArguments("--no-sandbox");
+                chromeOptions.addArguments("--disable-dev-shm-usage");
+                chromeOptions.addArguments("--window-size=1920,1080");
+
+                driver.set(new ChromeDriver(chromeOptions));
 
                 break;
 
@@ -44,9 +49,13 @@ public final class DriverFactory {
 
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
 
-                webDriver = new FirefoxDriver(firefoxOptions);
+                if (isHeadless || isCI) {
 
-                webDriver.manage().window().maximize();
+                    firefoxOptions.addArguments("--headless");
+
+                }
+
+                driver.set(new FirefoxDriver(firefoxOptions));
 
                 break;
 
@@ -54,35 +63,34 @@ public final class DriverFactory {
 
                 EdgeOptions edgeOptions = new EdgeOptions();
 
-                webDriver = new EdgeDriver(edgeOptions);
+                if (isHeadless || isCI) {
 
-                webDriver.manage().window().maximize();
+                    edgeOptions.addArguments("--headless=new");
+
+                }
+
+                edgeOptions.addArguments("--no-sandbox");
+                edgeOptions.addArguments("--disable-dev-shm-usage");
+
+                driver.set(new EdgeDriver(edgeOptions));
 
                 break;
 
-            default:
-
-                throw new IllegalArgumentException("Unsupported browser: " + browser);
-
         }
+    }
 
-        webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
-        webDriver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+    public static WebDriver getDriver() {
 
-        driver.set(webDriver);
+        return driver.get();
 
     }
 
     public static void quitDriver() {
 
-        if (driver.get() != null) {
+        driver.get().quit();
 
-            driver.get().quit();
-
-            driver.remove();
-
-        }
+        driver.remove();
 
     }
 
