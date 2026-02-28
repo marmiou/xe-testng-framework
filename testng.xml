@@ -2,14 +2,9 @@
 
 <suite name="XE Automation Suite" parallel="tests" thread-count="2">
     <test name="Chrome Tests">
-
         <parameter name="browser" value="chrome"/>
-
         <classes>
-
-            <class name="gr.xe.tests.DummyTest"/>
-
+            <class name="gr.xe.tests.RentSearchTest"/>
         </classes>
-
     </test>
 </suite>
