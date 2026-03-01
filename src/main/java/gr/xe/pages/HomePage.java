@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
 
 import org.openqa.selenium.By;
@@ -17,7 +18,9 @@ public class HomePage extends BasePage {
     private final By acceptCookiesBtn = By.id("accept-btn");
     private final By areaInput = By.cssSelector("[data-testid='area-input']");
     private final By autocompleteOptions = By.cssSelector("button[data-testid^='dropdown_option_']");
-    private final By selectedAreaTags = By.cssSelector("[data-testid$='-area-tag-span']");
+    private final By selectedAreaTags = By.cssSelector(
+            "[data-testid='geo_place_id_multiple_areas_tags'] .area-tag-button"
+    );
     private final By submitButton = By.cssSelector("[data-testid='submit-input']");
 
     public HomePage(WebDriver driver) {
@@ -49,32 +52,63 @@ public class HomePage extends BasePage {
     @Step("Select all autocomplete areas for: {area}")
     public HomePage selectAllAutocompleteAreas(String area) {
         Set<String> selected = new HashSet<>();
-
         while (true) {
             type(areaInput, area);
             wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(
                     autocompleteOptions
             ));
             List<WebElement> options = findAll(autocompleteOptions);
+
             boolean foundNew = false;
+
             for (WebElement option : options) {
-                String text = option.getText();
+                String text = option.getText().trim();
                 if (!selected.contains(text)) {
                     int before = findAll(selectedAreaTags).size();
                     option.click();
                     wait.until(d ->
                             findAll(selectedAreaTags).size() > before
                     );
+
+                    checkLastAddedArea(text);
                     selected.add(text);
                     foundNew = true;
                     break;
                 }
             }
+
             if (!foundNew) {
                 break;
             }
         }
+
         return this;
+    }
+
+    @Step("Check last added area")
+    private void checkLastAddedArea(String expected) {
+
+        List<WebElement> tags = findAll(selectedAreaTags);
+
+        String actual =
+                tags.getLast()
+                        .getText()
+                        .trim();
+        if (actual.equals(expected)) {
+
+            Allure.step("✔ Area added correctly: " + actual);
+
+        } else {
+
+            Allure.step(
+                    "⚠ WARNING: expected '" +
+                            expected +
+                            "' but got '" +
+                            actual +
+                            "'"
+            );
+
+        }
     }
 
     @Step("Click Search button")
