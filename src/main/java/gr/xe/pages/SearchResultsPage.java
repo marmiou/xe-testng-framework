@@ -1,12 +1,14 @@
 package gr.xe.pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.Keys;
-
 import java.util.List;
 import java.util.Objects;
+
+import io.qameta.allure.Step;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 public class SearchResultsPage extends BasePage {
 
@@ -31,14 +33,15 @@ public class SearchResultsPage extends BasePage {
         waitForResults();
     }
 
+    @Step("Set price filter from {min} to {max}")
     public SearchResultsPage setPriceFilter(int min, int max) {
-
         click(priceFilterButton);
         setRange(minimumPriceInput, maximumPriceInput, min, max);
         waitForResults();
         return this;
     }
 
+    @Step("Set size filter from {min} to {max}")
     public SearchResultsPage setSizeFilter(int min, int max) {
         click(sizeFilterButton);
         setRange(minimumSizeInput, maximumSizeInput, min, max);
@@ -76,6 +79,7 @@ public class SearchResultsPage extends BasePage {
         );
     }
 
+    @Step("Get all ad prices")
     public List<Integer> getAdPrices() {
         return findAll(adPrices)
                 .stream()
@@ -84,8 +88,8 @@ public class SearchResultsPage extends BasePage {
                 .toList();
     }
 
+    @Step("Get all ad sizes")
     public List<Integer> getAdSizes() {
-
         return findAll(adTitles)
                 .stream()
                 .map(WebElement::getText)

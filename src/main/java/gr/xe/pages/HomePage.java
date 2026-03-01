@@ -1,13 +1,15 @@
 package gr.xe.pages;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import io.qameta.allure.Step;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class HomePage extends BasePage {
 
@@ -22,12 +24,14 @@ public class HomePage extends BasePage {
         super(driver);
     }
 
+    @Step("Open XE homepage")
     public HomePage open() {
         driver.get(URL);
         find(areaInput);
         return this;
     }
 
+    @Step("Accept cookies")
     public HomePage acceptCookies() {
 
         try {
@@ -42,6 +46,7 @@ public class HomePage extends BasePage {
             return this;
         }
 
+    @Step("Select all autocomplete areas for: {area}")
     public HomePage selectAllAutocompleteAreas(String area) {
         Set<String> selected = new HashSet<>();
 
@@ -72,6 +77,7 @@ public class HomePage extends BasePage {
         return this;
     }
 
+    @Step("Click Search button")
     public SearchResultsPage clickSearch() {
         click(submitButton);
         return new SearchResultsPage(driver);
