@@ -12,16 +12,13 @@ public abstract class BaseTest {
     @Parameters("browser")
     @BeforeMethod(alwaysRun = true)
     public void setup(String browser) {
-
         DriverFactory.initDriver(browser);
-
         driver = DriverFactory.getDriver();
-
+        driver.manage().deleteAllCookies();
     }
 
     @AfterMethod(alwaysRun = true)
     public void teardown() {
-
         if (DriverFactory.getDriver() != null) {
             DriverFactory.quitDriver();
         }

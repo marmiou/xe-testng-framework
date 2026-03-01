@@ -34,11 +34,8 @@ public class SearchResultsPage extends BasePage {
     public SearchResultsPage setPriceFilter(int min, int max) {
 
         click(priceFilterButton);
-
         setRange(minimumPriceInput, maximumPriceInput, min, max);
-
         waitForResults();
-
         return this;
     }
 

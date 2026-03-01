@@ -11,18 +11,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RentSearchTest extends BaseTest {
 
     @Test
-
     public void shouldFilterResultsCorrectly() {
-
-
         SearchResultsPage resultsPage =
                 new HomePage(driver)
                         .open()
                         .acceptCookies()
                         .selectAllAutocompleteAreas("Παγκράτι")
                         .clickSearch()
-                        .setPriceFilter(200,700)
-                        .setSizeFilter(75,150);
+                        .setPriceFilter(200, 700)
+                        .setSizeFilter(75, 150);
         assertThat(resultsPage.getAdPrices())
                 .allMatch(price ->
                         price >= 200 && price <= 700
