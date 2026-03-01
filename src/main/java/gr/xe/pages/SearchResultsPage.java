@@ -2,7 +2,9 @@ package gr.xe.pages;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
+import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
 
 import org.openqa.selenium.By;
@@ -13,8 +15,6 @@ import org.openqa.selenium.WebElement;
 public class SearchResultsPage extends BasePage {
 
     private static final String RESULTS_URL_PART = "results";
-
-    // Locators
     private final By priceFilterButton = By.cssSelector("[data-testid='price-filter-button']");
     private final By sizeFilterButton = By.cssSelector("[data-testid='size-filter-button']");
     private final By minimumPriceInput = By.cssSelector("[data-testid='minimum_price_input']");
@@ -67,7 +67,8 @@ public class SearchResultsPage extends BasePage {
     }
 
     private int getNumericValue(By locator) {
-        String value = find(locator).getAttribute("value");
+        String value =
+                find(locator).getAttribute("value");
         return extractNumber(
                 Objects.requireNonNull(value)
         );
@@ -79,8 +80,22 @@ public class SearchResultsPage extends BasePage {
         );
     }
 
-    @Step("Get all ad prices")
-    public List<Integer> getAdPrices() {
+    @Step("Scroll one step down")
+    public void scrollOneStep() {
+        js.executeScript(
+                "window.scrollBy(0, 300);"
+        );
+    }
+
+    @Step("Check if reached bottom")
+    public boolean isAtBottom() {
+        return (Boolean) js.executeScript(
+                "return window.innerHeight + window.scrollY >= document.body.scrollHeight - 5;"
+        );
+    }
+
+    @Step("Collect rendered ad prices")
+    public List<Integer> collectRenderedAdPrices() {
         return findAll(adPrices)
                 .stream()
                 .map(WebElement::getText)
@@ -88,12 +103,28 @@ public class SearchResultsPage extends BasePage {
                 .toList();
     }
 
-    @Step("Get all ad sizes")
-    public List<Integer> getAdSizes() {
+    @Step("Collect rendered ad sizes")
+    public List<Integer> collectRenderedAdSizes() {
         return findAll(adTitles)
                 .stream()
                 .map(WebElement::getText)
                 .map(this::extractNumber)
                 .toList();
+    }
+
+
+    @Step("Collect unique ads while scrolling")
+    public void collectUniqueAds(Set<Integer> uniquePrices,
+                                 Set<Integer> uniqueSizes) {
+        while (true) {
+            uniquePrices.addAll(collectRenderedAdPrices());
+            uniqueSizes.addAll(collectRenderedAdSizes());
+
+            if (isAtBottom()) {
+                Allure.step("Reached bottom");
+                break;
+            }
+            scrollOneStep();
+        }
     }
 }

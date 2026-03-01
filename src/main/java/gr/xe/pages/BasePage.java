@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -14,10 +15,12 @@ public abstract class BasePage {
 
     protected final WebDriver driver;
     protected final WebDriverWait wait;
+    protected JavascriptExecutor js;
 
     public BasePage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.js = (JavascriptExecutor) driver;
     }
 
     protected WebElement find(By locator) {
@@ -25,7 +28,6 @@ public abstract class BasePage {
                 ExpectedConditions.visibilityOfElementLocated(locator)
         );
     }
-
 
     protected List<WebElement> findAll(By locator) {
         return driver.findElements(locator);
@@ -46,7 +48,7 @@ public abstract class BasePage {
         element.sendKeys(text);
     }
 
-    protected int extractNumber(String text) {
+    public int extractNumber(String text) {
         return Integer.parseInt(
                 text.replaceAll("[^0-9]", "")
         );
