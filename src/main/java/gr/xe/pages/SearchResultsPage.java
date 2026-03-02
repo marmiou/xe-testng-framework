@@ -15,6 +15,7 @@ public class SearchResultsPage extends BasePage {
     private static final String RESULTS_URL_PART = "results";
     private static final String ID = "id";
     private static final String VALUE = "value";
+    private static final String ARIA_DISABLED = "aria-disabled";
 
     private final By priceFilterButton = By.cssSelector("[data-testid='price-filter-button']");
     private final By sizeFilterButton = By.cssSelector("[data-testid='size-filter-button']");
@@ -28,13 +29,13 @@ public class SearchResultsPage extends BasePage {
     private final By carouselSlides = By.cssSelector(".slick-slide:not(.slick-cloned)[data-index]");
     private final By sortingDropdown = By.cssSelector("[data-testid='open-property-sorting-dropdown']");
     private final By sortPriceDesc = By.cssSelector("[data-testid='price_desc']");
+    private final By nextPageButton = By.cssSelector("a[rel='next']");
 
     public SearchResultsPage(WebDriver driver) {
         super(driver);
         wait.until(d ->
                 d.getCurrentUrl().contains(RESULTS_URL_PART)
         );
-
         waitForResults();
     }
 
@@ -124,20 +125,28 @@ public class SearchResultsPage extends BasePage {
     }
 
 
-    @Step("Collect all ads while scrolling")
+    @Step("Collect all ads from all pages")
     public Map<String, AdData> collectAllAds() {
+
         Map<String, AdData> allAds = new LinkedHashMap<>();
 
         while (true) {
+            while (!isAtBottom()) {
+                scrollOneStep();
+            }
+
             Map<String, AdData> visible = collectVisibleAds();
             visible.forEach(allAds::putIfAbsent);
 
-            if (isAtBottom()) {
-                Allure.step("Reached bottom. Total ads: " + allAds.size());
+            Allure.step("Collected from page. Total so far: " + allAds.size());
+            if (!hasNextPage()) {
+                Allure.step("No more pages");
                 break;
             }
-            scrollOneStep();
+            Allure.step("Moving to next page");
+            goToNextPage();
         }
+
         return allAds;
     }
 
@@ -148,6 +157,25 @@ public class SearchResultsPage extends BasePage {
         click(sortPriceDesc);
         waitForResults();
         return this;
+    }
+
+    private boolean hasNextPage() {
+        List<WebElement> nextButtons = findAll(nextPageButton);
+        if (nextButtons.isEmpty()) {
+            return false;
+        }
+        return !"true".equals(nextButtons.get(0).getAttribute(ARIA_DISABLED));
+    }
+
+    @Step("Go to next page")
+    private void goToNextPage() {
+
+        String oldUrl = driver.getCurrentUrl();
+        WebElement next = find(nextPageButton);
+        js.executeScript("arguments[0].scrollIntoView({block:'center'});", next);
+        click(nextPageButton);
+        wait.until(d -> !d.getCurrentUrl().equals(oldUrl));
+        waitForResults();
     }
 
 
