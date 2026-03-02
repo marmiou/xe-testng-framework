@@ -111,34 +111,49 @@ public class SearchResultsPage extends BasePage {
 
     // ✅ FINAL METHOD
     @Step("Collect unique ads while scrolling")
-    public void collectUniqueAds(Set<Integer> uniquePrices,Set<Integer> uniqueSizes,Set<String> imageInfos){
-
-        Set<String> seen=new LinkedHashSet<>();
+    public Map<String,AdData> collectUniqueAds(){
+        Map<String,AdData> ads=new LinkedHashMap<>();
 
         while(true){
-
-            uniquePrices.addAll(collectRenderedAdPrices());
-            uniqueSizes.addAll(collectRenderedAdSizes());
-
             for(WebElement card:findAll(adCards)){
                 String uuid=card.getAttribute("id");
 
-                if(seen.add(uuid)){
-                    int count=
+                if(!ads.containsKey(uuid)){
+                    AdData data=new AdData();
+                    data.price=
+                            extractNumber(
+                                    card.findElement(adPrices).getText()
+                            );
+                    data.size=
+                            extractNumber(
+                                    card.findElement(adTitles).getText()
+                            );
+                    data.images=
                             card.findElements(carouselSlides)
                                     .size();
-                    String result=
-                            uuid+" | "+count;
-                    Allure.step(result);
-                    imageInfos.add(result);
+                    ads.put(uuid,data);
+
+                    Allure.step(
+                            "Found Ad | "+uuid+
+                                    " | price="+data.price+
+                                    " | size="+data.size+
+                                    " | images="+data.images
+                    );
                 }
             }
             if(isAtBottom()){
                 Allure.step("Reached bottom");
                 break;
             }
-
             scrollOneStep();
         }
+        return ads;
+    }
+
+    public static class AdData{
+        public int price;
+        public int size;
+        public int images;
+
     }
 }

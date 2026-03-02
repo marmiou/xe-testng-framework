@@ -5,12 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.qameta.allure.Allure;
 import org.testng.annotations.Test;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Map;
 
 import gr.xe.core.BaseTest;
 import gr.xe.pages.HomePage;
 import gr.xe.pages.SearchResultsPage;
+import gr.xe.pages.SearchResultsPage.AdData;
 
 public class RentSearchTest extends BaseTest {
 
@@ -26,30 +26,26 @@ public class RentSearchTest extends BaseTest {
                         .setPriceFilter(200,700)
                         .setSizeFilter(75,150);
 
-        Set<Integer> uniquePrices=new LinkedHashSet<>();
-        Set<Integer> uniqueSizes=new LinkedHashSet<>();
-        Set<String> imageInfos=new LinkedHashSet<>();
+        Map<String,AdData> ads=
+                resultsPage.collectUniqueAds();
+        ads.forEach((uuid,ad)->{
 
-        resultsPage.collectUniqueAds(uniquePrices,uniqueSizes,imageInfos);
-
-        for(Integer price:uniquePrices){
-            Allure.step("Verify price: "+price,
-                    ()->assertThat(price).isBetween(200,700));
-        }
-
-        for(Integer size:uniqueSizes){
-            Allure.step("Verify size: "+size,
-                    ()->assertThat(size).isBetween(75,150));
-        }
-
-        for(String info:imageInfos){
-            String[] parts=info.split("\\|");
-            String uuid=parts[0].trim();
-            int count=Integer.parseInt(parts[1].trim());
             Allure.step(
-                    "Verify images ≤ 30 | Ad UUID: "+uuid+" | Images: "+count,
-                    ()->assertThat(count).isLessThanOrEqualTo(30)
+                    "Verify price is between 200 and 700 | Ad: "+uuid+" | Actual price: "+ad.price,
+                    ()->assertThat(ad.price).isBetween(200,700)
             );
-        }
+
+            Allure.step(
+                    "Verify size is between 75 and 150 | Ad: "+uuid+" | Actual size: "+ad.size,
+                    ()->assertThat(ad.size).isBetween(75,150)
+            );
+
+            Allure.step(
+                    "Verify images ≤ 30 | Ad: "+uuid+" | Actual images: "+ad.images,
+                    ()->assertThat(ad.images).isLessThanOrEqualTo(30)
+            );
+
+        });
+
     }
 }
