@@ -1,19 +1,19 @@
 # XE TestNG Selenium Framework
 
-Modern UI automation framework using **Java, Selenium, TestNG, Maven, and Allure Reports**.
+Modern UI automation framework using Java, Selenium, TestNG, Maven, and Allure Reports.
 
-Designed following **industry best practices (Page Object Model, parallel execution, CI/CD integration)**.
+Designed following industry best practices (Page Object Model, parallel execution, CI/CD integration).
 
 ---
 
 # 🚀 Tech Stack
 
-* Java 21
-* Selenium 4
-* TestNG
-* Maven
-* Allure Reporting
-* GitHub Actions (CI/CD)
+Java 21  
+Selenium 4  
+TestNG  
+Maven  
+Allure Reporting  
+GitHub Actions (CI/CD)  
 
 ---
 
@@ -22,21 +22,36 @@ Designed following **industry best practices (Page Object Model, parallel execut
 ```
 xe-testng-framework
 │
+├── LICENSE
 ├── pom.xml
 ├── testng.xml
 │
 ├── src
 │   ├── main/java/gr/xe
-│   │   ├── core        → DriverFactory, Base classes
-│   │   ├── pages       → Page Objects
-│   │   ├── components  → Reusable UI components
-│   │   └── utils       → Utilities
+│   │   ├── core
+│   │   │   └── DriverFactory.java
+│   │   │
+│   │   ├── pages
+│   │   │   ├── BasePage.java
+│   │   │   ├── HomePage.java
+│   │   │   └── SearchResultsPage.java
+│   │   │
+│   │   ├── components
+│   │   │
+│   │   └── utils
 │   │
-│   └── test/java/gr/xe/tests
-│       └── Test classes
+│   └── test
+│       ├── java/gr/xe
+│       │   ├── core
+│       │   │   └── BaseTest.java
+│       │   │
+│       │   └── tests
+│       │       └── RentSearchTest.java
+│       │
+│       └── resources
+│           └── allure.properties
 │
-└── src/test/resources
-    └── allure.properties
+└── README.md
 ```
 
 ---
@@ -47,13 +62,13 @@ xe-testng-framework
 
 Install:
 
-```bash
+```
 brew install openjdk@21
 ```
 
 Verify:
 
-```bash
+```
 java -version
 ```
 
@@ -63,13 +78,13 @@ java -version
 
 Install:
 
-```bash
+```
 brew install maven
 ```
 
 Verify:
 
-```bash
+```
 mvn -version
 ```
 
@@ -79,17 +94,15 @@ mvn -version
 
 Required:
 
-* Google Chrome
+Google Chrome  
 
 Supported:
 
-* Firefox
+Firefox  
 
 Optional:
 
-* Microsoft Edge
-
-> Microsoft Edge is supported by the framework but may require additional driver setup depending on the operating system and environment.
+Microsoft Edge  
 
 ---
 
@@ -97,60 +110,55 @@ Optional:
 
 Run all tests:
 
-```bash
+```
 mvn clean test
 ```
 
 Run specific suite:
 
-```bash
-mvn test -DsuiteXmlFile=testng.xml
 ```
-# 🧪 Headless Execution
-
-The framework supports both **headed** and **headless** execution.
-
-## Local execution (default)
-
-Runs with visible browser:
-
-```bash
-mvn test
+mvn test -DsuiteXmlFile=testng.xml
 ```
 
 ---
 
-## Headless execution
+# 🧪 Headless Execution
 
-Run tests in headless mode:
+Run in headless mode:
 
-```bash
+```
 mvn test -Dheadless=true
 ```
 
----
-
-## CI execution
-
-In CI environments (GitHub Actions), headless mode is automatically enabled.
-
-No additional configuration is required.
-
----
-
-This allows flexible execution depending on the environment.
-
-
+In CI environments, headless mode is enabled automatically.
 
 ---
 
 # 📊 Allure Report
 
-Generate and open report:
+## Run locally
 
-```bash
+```
 allure serve target/allure-results
 ```
+
+---
+
+## View CI Allure Report
+
+GitHub Actions:
+
+https://github.com/marmiou/xe-testng-framework/actions
+
+Steps:
+
+1. Click **Pages build and deployment**
+2. Open latest run
+3. Click report link
+
+Direct report link:
+
+https://marmiou.github.io/xe-testng-framework/
 
 ---
 
@@ -158,29 +166,25 @@ allure serve target/allure-results
 
 Configured via:
 
-```
 testng.xml
-```
 
 Example:
 
-```xml
+```
 <parameter name="browser" value="chrome"/>
 ```
 
-Supported by the framework:
+Supported:
 
-* Chrome (default)
-* Firefox
-* Edge (optional)
+Chrome  
+Firefox  
+Edge  
 
 ---
 
 # ⚡ Parallel Execution
 
-Enabled via TestNG configuration:
-
-```xml
+```
 <suite parallel="tests" thread-count="3">
 ```
 
@@ -190,9 +194,18 @@ Enabled via TestNG configuration:
 
 GitHub Actions pipeline:
 
-* Executes tests automatically
-* Generates Allure results
-* Uploads test artifacts
+• Runs tests automatically  
+• Uses headless mode  
+• Generates Allure report  
+• Publishes report to GitHub Pages  
+
+Pipeline:
+
+https://github.com/marmiou/xe-testng-framework/actions
+
+Published report:
+
+https://marmiou.github.io/xe-testng-framework/
 
 ---
 
@@ -200,7 +213,7 @@ GitHub Actions pipeline:
 
 ```java
 @Test
-public void openHomePage() {
+public void openHomePage(){
 
     driver.get("https://www.xe.gr");
 
@@ -214,24 +227,22 @@ public void openHomePage() {
 
 # 🧠 Framework Features
 
-* Thread-safe DriverFactory
-* BaseTest abstraction
-* TestNG integration
-* Allure reporting
-* Parallel execution support
-* Multi-browser support
-* CI/CD ready architecture
+Thread-safe DriverFactory  
+Page Object Model  
+TestNG integration  
+Allure reporting  
+Parallel execution  
+Multi-browser support  
+CI/CD ready  
 
 ---
 
 # 👩‍💻 Author
 
-**Markella Efthymiou**
+Markella Efthymiou  
 
-QA Automation Engineer
+QA Automation Engineer  
 
-GitHub:
+GitHub:  
+
 https://github.com/marmiou/
-
----
-
