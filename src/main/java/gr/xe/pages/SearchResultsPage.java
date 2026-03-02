@@ -13,6 +13,8 @@ import org.openqa.selenium.WebElement;
 public class SearchResultsPage extends BasePage {
 
     private static final String RESULTS_URL_PART = "results";
+    private static final String ID = "id";
+    private static final String VALUE = "value";
 
     private final By priceFilterButton = By.cssSelector("[data-testid='price-filter-button']");
     private final By sizeFilterButton = By.cssSelector("[data-testid='size-filter-button']");
@@ -20,140 +22,138 @@ public class SearchResultsPage extends BasePage {
     private final By maximumPriceInput = By.cssSelector("[data-testid='maximum_price_input']");
     private final By minimumSizeInput = By.cssSelector("[data-testid='minimum_size_input']");
     private final By maximumSizeInput = By.cssSelector("[data-testid='maximum_size_input']");
-
+    private final By adCards = By.cssSelector("div.common-ad[data-testid^='property-ad-']");
     private final By adPrices = By.cssSelector("[data-testid='property-ad-price']");
     private final By adTitles = By.cssSelector("[data-testid='property-ad-title']");
-
-    // ✅ REAL AD CARD ROOT
-    private final By adCards =
-            By.cssSelector("div.common-ad[data-testid^='property-ad-']");
-
-    private final By adImageCarousels =
-            By.cssSelector("[data-testid='property-ad-images-carousel']");
-
-    private final By carouselSlides =
-            By.cssSelector(".slick-slide:not(.slick-cloned)[data-index]");
+    private final By carouselSlides = By.cssSelector(".slick-slide:not(.slick-cloned)[data-index]");
+    private final By sortingDropdown = By.cssSelector("[data-testid='open-property-sorting-dropdown']");
+    private final By sortPriceDesc = By.cssSelector("[data-testid='price_desc']");
 
     public SearchResultsPage(WebDriver driver) {
         super(driver);
-        wait.until(d -> d.getCurrentUrl().contains(RESULTS_URL_PART));
+        wait.until(d ->
+                d.getCurrentUrl().contains(RESULTS_URL_PART)
+        );
+
         waitForResults();
     }
 
-    @Step("Set price filter from {min} to {max}")
-    public SearchResultsPage setPriceFilter(int min,int max){
+
+    @Step("Set price filter {min}-{max}")
+    public SearchResultsPage setPriceFilter(int min, int max) {
         click(priceFilterButton);
-        setRange(minimumPriceInput,maximumPriceInput,min,max);
+        setRange(
+                minimumPriceInput,
+                maximumPriceInput,
+                min,
+                max
+        );
         waitForResults();
         return this;
     }
 
-    @Step("Set size filter from {min} to {max}")
-    public SearchResultsPage setSizeFilter(int min,int max){
+
+    @Step("Set size filter {min}-{max}")
+    public SearchResultsPage setSizeFilter(int min, int max) {
         click(sizeFilterButton);
-        setRange(minimumSizeInput,maximumSizeInput,min,max);
+        setRange(
+                minimumSizeInput,
+                maximumSizeInput,
+                min,
+                max
+        );
         waitForResults();
         return this;
     }
 
-    private void setRange(By minLocator,By maxLocator,int min,int max){
-        clearAndType(minLocator,min);
-        clearAndType(maxLocator,max);
-        wait.until(d->getNumericValue(minLocator)==min&&getNumericValue(maxLocator)==max);
+
+
+    private void setRange(By minLocator, By maxLocator, int min, int max) {
+        clearAndType(minLocator, min);
+        clearAndType(maxLocator, max);
+        wait.until(d ->
+                getNumericValue(minLocator) == min && getNumericValue(maxLocator) == max
+        );
     }
 
-    private void clearAndType(By locator,int value){
-        WebElement element=find(locator);
-        element.sendKeys(Keys.CONTROL+"a");
+
+    private void clearAndType(By locator, int value) {
+        WebElement element = find(locator);
+        element.sendKeys(Keys.CONTROL + "a");
         element.sendKeys(Keys.DELETE);
         element.sendKeys(String.valueOf(value));
         element.sendKeys(Keys.TAB);
     }
 
-    private int getNumericValue(By locator){
-        String value=find(locator).getAttribute("value");
-        return extractNumber(Objects.requireNonNull(value));
+
+    private int getNumericValue(By locator) {
+        return extractNumber(find(locator).getAttribute(VALUE));
     }
 
-    private void waitForResults(){
-        wait.until(d->!findAll(adPrices).isEmpty());
-    }
 
-    @Step("Scroll one step down")
-    public void scrollOneStep(){
-        js.executeScript("window.scrollBy(0,400);");
-    }
-
-    @Step("Check if reached bottom")
-    public boolean isAtBottom(){
-        return (Boolean)js.executeScript(
-                "return window.innerHeight + window.scrollY >= document.body.scrollHeight - 5;"
+    private void waitForResults() {
+        wait.until(d -> !findAll(adCards).isEmpty()
         );
     }
 
-    @Step("Collect rendered ad prices")
-    public List<Integer> collectRenderedAdPrices(){
-        return findAll(adPrices)
-                .stream()
-                .map(WebElement::getText)
-                .map(this::extractNumber)
-                .toList();
+
+    public void scrollOneStep() {
+        js.executeScript("window.scrollBy(0,400);");
     }
 
-    @Step("Collect rendered ad sizes")
-    public List<Integer> collectRenderedAdSizes(){
-        return findAll(adTitles)
-                .stream()
-                .map(WebElement::getText)
-                .map(this::extractNumber)
-                .toList();
+
+    public boolean isAtBottom() {
+        return (Boolean) js.executeScript(
+                "return window.innerHeight + window.scrollY >= document.body.scrollHeight - 5"
+        );
     }
 
-    // ✅ FINAL METHOD
-    @Step("Collect unique ads while scrolling")
-    public Map<String,AdData> collectUniqueAds(){
-        Map<String,AdData> ads=new LinkedHashMap<>();
 
-        while(true){
-            for(WebElement card:findAll(adCards)){
-                String uuid=card.getAttribute("id");
+    private Map<String, AdData> collectVisibleAds() {
+        Map<String, AdData> ads = new LinkedHashMap<>();
+        for (WebElement card : findAll(adCards)) {
+            String uuid = card.getAttribute(ID);
 
-                if(!ads.containsKey(uuid)){
-                    AdData data=new AdData();
-                    data.price=
-                            extractNumber(
-                                    card.findElement(adPrices).getText()
-                            );
-                    data.size=
-                            extractNumber(
-                                    card.findElement(adTitles).getText()
-                            );
-                    data.images=
-                            card.findElements(carouselSlides)
-                                    .size();
-                    ads.put(uuid,data);
-
-                    Allure.step(
-                            "Found Ad | "+uuid+
-                                    " | price="+data.price+
-                                    " | size="+data.size+
-                                    " | images="+data.images
-                    );
-                }
-            }
-            if(isAtBottom()){
-                Allure.step("Reached bottom");
-                break;
-            }
-            scrollOneStep();
+            AdData data = new AdData();
+            data.price = extractNumber(card.findElement(adPrices).getText());
+            data.size = extractNumber(card.findElement(adTitles).getText());
+            data.images = card.findElements(carouselSlides).size();
+            ads.put(uuid, data);
         }
         return ads;
     }
 
-    public static class AdData{
+
+    @Step("Collect all ads while scrolling")
+    public Map<String, AdData> collectAllAds() {
+        Map<String, AdData> allAds = new LinkedHashMap<>();
+
+        while (true) {
+            Map<String, AdData> visible = collectVisibleAds();
+            visible.forEach(allAds::putIfAbsent);
+
+            if (isAtBottom()) {
+                Allure.step("Reached bottom. Total ads: " + allAds.size());
+                break;
+            }
+            scrollOneStep();
+        }
+        return allAds;
+    }
+
+
+    @Step("Sort by price descending")
+    public SearchResultsPage sortByPriceDesc() {
+        click(sortingDropdown);
+        click(sortPriceDesc);
+        waitForResults();
+        return this;
+    }
+
+
+    public static class AdData {
         public int price;
         public int size;
         public int images;
-
     }
 }
