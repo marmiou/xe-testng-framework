@@ -95,11 +95,9 @@ public class HomePage extends BasePage {
                         .getText()
                         .trim();
         if (actual.equals(expected)) {
-
             Allure.step("✔ Area added correctly: " + actual);
 
         } else {
-
             Allure.step(
                     "⚠ WARNING: expected '" +
                             expected +

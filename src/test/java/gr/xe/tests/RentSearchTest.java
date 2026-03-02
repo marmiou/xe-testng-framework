@@ -7,6 +7,8 @@ import org.testng.annotations.Test;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import gr.xe.core.BaseTest;
 import gr.xe.pages.HomePage;
@@ -18,7 +20,6 @@ public class RentSearchTest extends BaseTest {
     public void shouldFilterResultsCorrectly() {
 
         SearchResultsPage resultsPage =
-
                 new HomePage(driver)
                         .open()
                         .acceptCookies()
@@ -27,23 +28,35 @@ public class RentSearchTest extends BaseTest {
                         .setPriceFilter(200, 700)
                         .setSizeFilter(75, 150);
 
+
         Set<Integer> uniquePrices = new LinkedHashSet<>();
         Set<Integer> uniqueSizes = new LinkedHashSet<>();
-        resultsPage.collectUniqueAds(uniquePrices, uniqueSizes);
+        Set<String> imageInfos = new LinkedHashSet<>();
+
+        resultsPage.collectUniqueAds(
+                uniquePrices,
+                uniqueSizes,
+                imageInfos
+        );
 
         for (Integer price : uniquePrices) {
-            Allure.step(
-                    "Verify price from unique filtered results ad is within filter range: " + price,
-                    () -> assertThat(price)
-                            .isBetween(200, 700)
+            Allure.step("Verify price: " + price, () -> assertThat(price).isBetween(200, 700));
+        }
+
+
+        for (Integer size : uniqueSizes) {Allure.step("Verify size: " + size,
+                    () -> assertThat(size)
+                            .isBetween(75, 150)
             );
         }
 
-        for (Integer size : uniqueSizes) {
+        for (String info : imageInfos) {
+            String[] parts = info.split("\\|");
+            String title = parts[0].trim();
+            int count = Integer.parseInt(parts[1].trim());
             Allure.step(
-                    "Verify size from unique filtered results ad is within filter range: " + size,
-                    () -> assertThat(size)
-                            .isBetween(75, 150)
+                    "Verify images ≤ 30 | Ad: " + title + " | Images: " + count,
+                    () -> assertThat(count).isLessThanOrEqualTo(30)
             );
         }
     }

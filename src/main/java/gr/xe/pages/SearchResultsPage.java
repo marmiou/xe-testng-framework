@@ -1,8 +1,6 @@
 package gr.xe.pages;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
@@ -15,6 +13,7 @@ import org.openqa.selenium.WebElement;
 public class SearchResultsPage extends BasePage {
 
     private static final String RESULTS_URL_PART = "results";
+
     private final By priceFilterButton = By.cssSelector("[data-testid='price-filter-button']");
     private final By sizeFilterButton = By.cssSelector("[data-testid='size-filter-button']");
     private final By minimumPriceInput = By.cssSelector("[data-testid='minimum_price_input']");
@@ -23,15 +22,19 @@ public class SearchResultsPage extends BasePage {
     private final By maximumSizeInput = By.cssSelector("[data-testid='maximum_size_input']");
     private final By adPrices = By.cssSelector("[data-testid='property-ad-price']");
     private final By adTitles = By.cssSelector("[data-testid='property-ad-title']");
-
+    private final By adCards = By.cssSelector("[data-testid='property-ad-card']");
+    private final By adImageCarousels = By.cssSelector("[data-testid='property-ad-images-carousel']");
+    private final By carouselSlides = By.cssSelector(".slick-slide:not(.slick-cloned)");
 
     public SearchResultsPage(WebDriver driver) {
+
         super(driver);
-        wait.until(d ->
-                d.getCurrentUrl().contains(RESULTS_URL_PART)
-        );
+
+        wait.until(d -> d.getCurrentUrl().contains(RESULTS_URL_PART));
+
         waitForResults();
     }
+
 
     @Step("Set price filter from {min} to {max}")
     public SearchResultsPage setPriceFilter(int min, int max) {
@@ -66,25 +69,19 @@ public class SearchResultsPage extends BasePage {
         element.sendKeys(Keys.TAB);
     }
 
+
     private int getNumericValue(By locator) {
-        String value =
-                find(locator).getAttribute("value");
-        return extractNumber(
-                Objects.requireNonNull(value)
-        );
+        String value = find(locator).getAttribute("value");
+        return extractNumber(Objects.requireNonNull(value));
     }
 
     private void waitForResults() {
-        wait.until(d ->
-                !findAll(adPrices).isEmpty()
-        );
+        wait.until(d -> !findAll(adPrices).isEmpty());
     }
 
     @Step("Scroll one step down")
     public void scrollOneStep() {
-        js.executeScript(
-                "window.scrollBy(0, 300);"
-        );
+        js.executeScript("window.scrollBy(0, 400);");
     }
 
     @Step("Check if reached bottom")
@@ -112,19 +109,46 @@ public class SearchResultsPage extends BasePage {
                 .toList();
     }
 
+    @Step("Collect rendered image counts")
+    public List<String> collectRenderedImageCounts() {
+
+        List<String> results = new ArrayList<>();
+        List<WebElement> carousels = findAll(adImageCarousels);
+        List<WebElement> titles = findAll(adTitles);
+
+        for (int i = 0; i < carousels.size(); i++) {
+            String title = titles.get(i).getText();
+            int count =
+                    carousels.get(i)
+                            .findElements(carouselSlides)
+                            .size();
+            String result =
+                    title + " | " + count;
+            Allure.step(result);
+            results.add(result);
+        }
+        return results;
+    }
 
     @Step("Collect unique ads while scrolling")
-    public void collectUniqueAds(Set<Integer> uniquePrices,
-                                 Set<Integer> uniqueSizes) {
+    public void collectUniqueAds(
+            Set<Integer> uniquePrices,
+            Set<Integer> uniqueSizes,
+            Set<String> imageInfos
+
+    ) {
         while (true) {
             uniquePrices.addAll(collectRenderedAdPrices());
             uniqueSizes.addAll(collectRenderedAdSizes());
+            imageInfos.addAll(collectRenderedImageCounts());
 
             if (isAtBottom()) {
                 Allure.step("Reached bottom");
                 break;
             }
             scrollOneStep();
+            wait.until(d -> !findAll(adImageCarousels).isEmpty());
         }
     }
+
 }
