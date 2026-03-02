@@ -20,79 +20,79 @@ public class SearchResultsPage extends BasePage {
     private final By maximumPriceInput = By.cssSelector("[data-testid='maximum_price_input']");
     private final By minimumSizeInput = By.cssSelector("[data-testid='minimum_size_input']");
     private final By maximumSizeInput = By.cssSelector("[data-testid='maximum_size_input']");
+
     private final By adPrices = By.cssSelector("[data-testid='property-ad-price']");
     private final By adTitles = By.cssSelector("[data-testid='property-ad-title']");
-    private final By adCards = By.cssSelector("[data-testid='property-ad-card']");
-    private final By adImageCarousels = By.cssSelector("[data-testid='property-ad-images-carousel']");
-    private final By carouselSlides = By.cssSelector(".slick-slide:not(.slick-cloned)");
+
+    // ✅ REAL AD CARD ROOT
+    private final By adCards =
+            By.cssSelector("div.common-ad[data-testid^='property-ad-']");
+
+    private final By adImageCarousels =
+            By.cssSelector("[data-testid='property-ad-images-carousel']");
+
+    private final By carouselSlides =
+            By.cssSelector(".slick-slide:not(.slick-cloned)[data-index]");
 
     public SearchResultsPage(WebDriver driver) {
-
         super(driver);
-
         wait.until(d -> d.getCurrentUrl().contains(RESULTS_URL_PART));
-
         waitForResults();
     }
 
-
     @Step("Set price filter from {min} to {max}")
-    public SearchResultsPage setPriceFilter(int min, int max) {
+    public SearchResultsPage setPriceFilter(int min,int max){
         click(priceFilterButton);
-        setRange(minimumPriceInput, maximumPriceInput, min, max);
+        setRange(minimumPriceInput,maximumPriceInput,min,max);
         waitForResults();
         return this;
     }
 
     @Step("Set size filter from {min} to {max}")
-    public SearchResultsPage setSizeFilter(int min, int max) {
+    public SearchResultsPage setSizeFilter(int min,int max){
         click(sizeFilterButton);
-        setRange(minimumSizeInput, maximumSizeInput, min, max);
+        setRange(minimumSizeInput,maximumSizeInput,min,max);
         waitForResults();
         return this;
     }
 
-    private void setRange(By minLocator, By maxLocator, int min, int max) {
-        clearAndType(minLocator, min);
-        clearAndType(maxLocator, max);
-        wait.until(d ->
-                getNumericValue(minLocator) == min &&
-                        getNumericValue(maxLocator) == max
-        );
+    private void setRange(By minLocator,By maxLocator,int min,int max){
+        clearAndType(minLocator,min);
+        clearAndType(maxLocator,max);
+        wait.until(d->getNumericValue(minLocator)==min&&getNumericValue(maxLocator)==max);
     }
 
-    private void clearAndType(By locator, int value) {
-        WebElement element = find(locator);
-        element.sendKeys(Keys.CONTROL + "a");
+    private void clearAndType(By locator,int value){
+        WebElement element=find(locator);
+        element.sendKeys(Keys.CONTROL+"a");
         element.sendKeys(Keys.DELETE);
         element.sendKeys(String.valueOf(value));
         element.sendKeys(Keys.TAB);
     }
 
-
-    private int getNumericValue(By locator) {
-        String value = find(locator).getAttribute("value");
+    private int getNumericValue(By locator){
+        String value=find(locator).getAttribute("value");
         return extractNumber(Objects.requireNonNull(value));
     }
 
-    private void waitForResults() {
-        wait.until(d -> !findAll(adPrices).isEmpty());
+    private void waitForResults(){
+        wait.until(d->!findAll(adPrices).isEmpty());
     }
 
     @Step("Scroll one step down")
-    public void scrollOneStep() {
-        js.executeScript("window.scrollBy(0, 400);");
+    public void scrollOneStep(){
+        js.executeScript("window.scrollBy(0,400);");
     }
 
     @Step("Check if reached bottom")
-    public boolean isAtBottom() {
-        return (Boolean) js.executeScript(
+    public boolean isAtBottom(){
+        return (Boolean)js.executeScript(
                 "return window.innerHeight + window.scrollY >= document.body.scrollHeight - 5;"
         );
     }
 
     @Step("Collect rendered ad prices")
-    public List<Integer> collectRenderedAdPrices() {
+    public List<Integer> collectRenderedAdPrices(){
         return findAll(adPrices)
                 .stream()
                 .map(WebElement::getText)
@@ -101,7 +101,7 @@ public class SearchResultsPage extends BasePage {
     }
 
     @Step("Collect rendered ad sizes")
-    public List<Integer> collectRenderedAdSizes() {
+    public List<Integer> collectRenderedAdSizes(){
         return findAll(adTitles)
                 .stream()
                 .map(WebElement::getText)
@@ -109,46 +109,36 @@ public class SearchResultsPage extends BasePage {
                 .toList();
     }
 
-    @Step("Collect rendered image counts")
-    public List<String> collectRenderedImageCounts() {
-
-        List<String> results = new ArrayList<>();
-        List<WebElement> carousels = findAll(adImageCarousels);
-        List<WebElement> titles = findAll(adTitles);
-
-        for (int i = 0; i < carousels.size(); i++) {
-            String title = titles.get(i).getText();
-            int count =
-                    carousels.get(i)
-                            .findElements(carouselSlides)
-                            .size();
-            String result =
-                    title + " | " + count;
-            Allure.step(result);
-            results.add(result);
-        }
-        return results;
-    }
-
+    // ✅ FINAL METHOD
     @Step("Collect unique ads while scrolling")
-    public void collectUniqueAds(
-            Set<Integer> uniquePrices,
-            Set<Integer> uniqueSizes,
-            Set<String> imageInfos
+    public void collectUniqueAds(Set<Integer> uniquePrices,Set<Integer> uniqueSizes,Set<String> imageInfos){
 
-    ) {
-        while (true) {
+        Set<String> seen=new LinkedHashSet<>();
+
+        while(true){
+
             uniquePrices.addAll(collectRenderedAdPrices());
             uniqueSizes.addAll(collectRenderedAdSizes());
-            imageInfos.addAll(collectRenderedImageCounts());
 
-            if (isAtBottom()) {
+            for(WebElement card:findAll(adCards)){
+                String uuid=card.getAttribute("id");
+
+                if(seen.add(uuid)){
+                    int count=
+                            card.findElements(carouselSlides)
+                                    .size();
+                    String result=
+                            uuid+" | "+count;
+                    Allure.step(result);
+                    imageInfos.add(result);
+                }
+            }
+            if(isAtBottom()){
                 Allure.step("Reached bottom");
                 break;
             }
+
             scrollOneStep();
-            wait.until(d -> !findAll(adImageCarousels).isEmpty());
         }
     }
-
 }
