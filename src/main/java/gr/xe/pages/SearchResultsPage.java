@@ -1,12 +1,13 @@
 package gr.xe.pages;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -33,9 +34,7 @@ public class SearchResultsPage extends BasePage {
 
     public SearchResultsPage(WebDriver driver) {
         super(driver);
-        wait.until(d ->
-                d.getCurrentUrl().contains(RESULTS_URL_PART)
-        );
+        wait.until(d -> d.getCurrentUrl().contains(RESULTS_URL_PART));
         waitForResults();
     }
 
@@ -43,12 +42,7 @@ public class SearchResultsPage extends BasePage {
     @Step("Set price filter {min}-{max}")
     public SearchResultsPage setPriceFilter(int min, int max) {
         click(priceFilterButton);
-        setRange(
-                minimumPriceInput,
-                maximumPriceInput,
-                min,
-                max
-        );
+        setRange(minimumPriceInput, maximumPriceInput, min, max);
         waitForResults();
         return this;
     }
@@ -57,33 +51,19 @@ public class SearchResultsPage extends BasePage {
     @Step("Set size filter {min}-{max}")
     public SearchResultsPage setSizeFilter(int min, int max) {
         click(sizeFilterButton);
-        setRange(
-                minimumSizeInput,
-                maximumSizeInput,
-                min,
-                max
-        );
+        setRange(minimumSizeInput, maximumSizeInput, min, max);
         waitForResults();
         return this;
     }
 
 
-
     private void setRange(By minLocator, By maxLocator, int min, int max) {
-        clearAndType(minLocator, min);
-        clearAndType(maxLocator, max);
+        clearAndType(minLocator, String.valueOf(min));
+        clearAndType(maxLocator, String.valueOf(max));
         wait.until(d ->
-                getNumericValue(minLocator) == min && getNumericValue(maxLocator) == max
+                getNumericValue(minLocator) == min &&
+                        getNumericValue(maxLocator) == max
         );
-    }
-
-
-    private void clearAndType(By locator, int value) {
-        WebElement element = find(locator);
-        element.sendKeys(Keys.CONTROL + "a");
-        element.sendKeys(Keys.DELETE);
-        element.sendKeys(String.valueOf(value));
-        element.sendKeys(Keys.TAB);
     }
 
 
@@ -93,20 +73,7 @@ public class SearchResultsPage extends BasePage {
 
 
     private void waitForResults() {
-        wait.until(d -> !findAll(adCards).isEmpty()
-        );
-    }
-
-
-    public void scrollOneStep() {
-        js.executeScript("window.scrollBy(0,400);");
-    }
-
-
-    public boolean isAtBottom() {
-        return (Boolean) js.executeScript(
-                "return window.innerHeight + window.scrollY >= document.body.scrollHeight - 5"
-        );
+        wait.until(d -> !findAll(adCards).isEmpty());
     }
 
 
@@ -169,11 +136,10 @@ public class SearchResultsPage extends BasePage {
 
     @Step("Go to next page")
     private void goToNextPage() {
-
-        String oldUrl = driver.getCurrentUrl();
         WebElement next = find(nextPageButton);
         js.executeScript("arguments[0].scrollIntoView({block:'center'});", next);
-        click(nextPageButton);
+        String oldUrl = driver.getCurrentUrl();
+        next.click();
         wait.until(d -> !d.getCurrentUrl().equals(oldUrl));
         waitForResults();
     }
