@@ -1,0 +1,3 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","35174","shouldSortResultsByPriceDescending","XE Automation Suite","2026-03-02","passed","2026-03-02","gr.xe.tests.RentSearchTest","Chrome Tests","gr.xe.tests.RentSearchTest","shouldSortResultsByPriceDescending"
+"","37744","shouldFilterResultsCorrectly","XE Automation Suite","2026-03-02","passed","2026-03-02","gr.xe.tests.RentSearchTest","Chrome Tests","gr.xe.tests.RentSearchTest","shouldFilterResultsCorrectly"
